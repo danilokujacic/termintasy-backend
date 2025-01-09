@@ -17,14 +17,7 @@ COPY . .
 RUN npm run build
 
 
-# Copy entrypoint script for migrations and seeding
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-# Set the entrypoint to handle migrations and start both applications
-ENTRYPOINT ["/entrypoint.sh"]
-
-# Step 7: Expose the port the app runs on
+# Step 8: Expose the port the app runs on
 EXPOSE 3000
 
 # Step 8: Define the command to run the application
