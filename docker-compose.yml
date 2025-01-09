@@ -1,0 +1,15 @@
+version: '3.9' # Use the latest version of the Docker Compose file format
+
+services:
+  app:
+    build:
+      context: . # Path to the directory containing the Dockerfile
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000' # Map container port 3000 to host port 3000
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - .:/usr/src/app # Sync the app code for easier development
+      - /usr/src/app/node_modules # Prevent node_modules from being overridden
+    command: npm run start:prod # Command to run the NestJS app in production mode

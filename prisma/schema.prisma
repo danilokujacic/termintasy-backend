@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Position {
+  GK
+  DEF
+  ATK
+  MID
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+  username String   @unique
+  email    String
+  password String?
+  openid String?
+
+  // Relation to UserTeam (not nullable)
+  userTeam UserTeam? @relation("UserTeamOwner")
+}
+
+model Player {
+  id         Int       @id @default(autoincrement())
+  name       String    @unique
+  position   Position
+
+  gameTeams   GameTeam[] @relation("PlayerTeams")
+
+  // Many-to-many relation with UserTeam
+  userTeams  UserTeam[] @relation("PlayerUserTeams")
+
+  gameStats  GameStat[] // Relation to GameStats (all stats of the player)
+}
+
+model GameStat {
+  id         Int      @id @default(autoincrement())  // Unique ID for the stat record
+  playerId   Int      // Reference to the Player
+  player     Player   @relation(fields: [playerId], references: [id])
+  gameId     String      // Reference to the Game
+  game       Game     @relation(fields: [gameId], references: [id])
+  goal       Int      @default(0)   // Number of goals scored by the player in the game
+  cleanSheet Int      @default(0)   // Clean sheet (1 if the player kept a clean sheet, 0 if not)
+  assists    Int      @default(0)   // Number of assists made by the player
+  active Boolean @default(false)
+  points Int @default(0)
+  createdAt  DateTime @default(now())  // Timestamp when the record was created
+  updatedAt  DateTime @updatedAt      // Timestamp when the record was last updated
+}
+
+model Game {
+  id         String       @id @default(uuid())
+  homeTeamId String
+  awayTeamId String
+  homeTeam   GameTeam  @relation("HomeGames", fields: [homeTeamId], references: [id])
+  awayTeam   GameTeam  @relation("AwayGames", fields: [awayTeamId], references: [id])
+
+  gameStats  GameStat[]  // Relation to GameStats (all stats in this game)
+  // Optional fields like scores or match date
+  homeScore  Int? @default(0)
+  awayScore  Int? @default(0)
+  matchDate  DateTime
+  active Boolean @default(false)
+  summarized Boolean @default(false)
+}
+
+model UserTeam {
+  id        String @id @default(uuid())
+  name      String
+  points    Int    @default(0)
+  players   Player[]  @relation("PlayerUserTeams") // Many-to-many with Player
+  ownerId   Int    @unique
+  owner     User?   @relation("UserTeamOwner", fields: [ownerId], references: [id])
+
+  // No need to add the `userTeam` field here as it's already in the User model
+}
+
+model GameTeam {
+  id        String       @id @default(uuid())
+  name      String    @unique
+  players   Player[]  @relation("PlayerTeams")// Players associated with the team
+  homeGames Game[]    @relation("HomeGames") // Games where this team is the home team
+  awayGames Game[]    @relation("AwayGames") // Games where this team is the away team
+}
