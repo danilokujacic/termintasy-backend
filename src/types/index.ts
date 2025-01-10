@@ -6,3 +6,4 @@ export * from './lib/dto/CreateGameTeamDTO';
 export * from './lib/dto/CreateGameDTO';
 export * from './lib/dto/GameStateTypeDTO';
 export * from './lib/dto/GmailLoginDTO';
+export * from './lib/dto/MakeTransferDTO';

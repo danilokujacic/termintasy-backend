@@ -15,16 +15,6 @@ export class GameEndProcessor extends WorkerHost {
       where: { id: gameId },
       include: {
         gameStats: true,
-        homeTeam: {
-          include: {
-            players: true,
-          },
-        },
-        awayTeam: {
-          include: {
-            players: true,
-          },
-        },
       },
     });
 
@@ -32,8 +22,6 @@ export class GameEndProcessor extends WorkerHost {
       throw new Error('Game not found');
     }
 
-    console.log('end game', game);
-    const allPlayers = [...game.homeTeam.players, ...game.awayTeam.players];
     const gameStats = game.gameStats.map((gameStat) => gameStat.id);
 
     await this.prisma.gameStat.updateMany({
@@ -44,6 +32,14 @@ export class GameEndProcessor extends WorkerHost {
       },
       data: {
         active: false,
+      },
+    });
+
+    await this.prisma.userTeam.updateMany({
+      data: {
+        transfers: {
+          increment: 1,
+        },
       },
     });
 

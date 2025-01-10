@@ -72,6 +72,7 @@ model Game {
 model UserTeam {
   id        String @id @default(uuid())
   name      String
+  transfers Int @default(1)
   points    Int    @default(0)
   players   Player[]  @relation("PlayerUserTeams") // Many-to-many with Player
   ownerId   Int    @unique

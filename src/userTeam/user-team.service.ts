@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { CreateGameTeamDTO } from '../types';
+import { CreateGameTeamDTO, MakeTransferDTO } from '../types';
 import { PrismaService } from '../prisma.service';
 
 @Injectable()
@@ -14,6 +14,56 @@ export class UserTeamService {
     });
 
     return teams;
+  }
+
+  async makeTransfer(teamId: string, transferDTO: MakeTransferDTO) {
+    const { players, playersToReceive } = transferDTO;
+
+    // Step 1: Find the team by ID
+    const team = await this.prismaService.userTeam.findUnique({
+      where: { id: teamId },
+      include: { players: true },
+    });
+
+    if (!team) {
+      throw new Error('Team not found');
+    }
+
+    console.log(players, playersToReceive);
+
+    // Step 2: Determine the players to remove and add
+    const playersToRemove = team.players.filter((player) =>
+      players.includes(player.id),
+    );
+
+    const playersToAdd = await this.prismaService.player.findMany({
+      where: { id: { in: playersToReceive } },
+    });
+
+    const receivePlayersTransfersDiff =
+      team.transfers - playersToReceive.length;
+
+    // Step 3: Update the team
+    const updatedTeam = await this.prismaService.userTeam.update({
+      where: { id: teamId },
+      data: {
+        points: {
+          decrement:
+            playersToReceive.length - team.transfers < 0
+              ? 0
+              : (playersToReceive.length - team.transfers) * 4,
+        },
+        transfers:
+          receivePlayersTransfersDiff < 0 ? 0 : receivePlayersTransfersDiff,
+        players: {
+          disconnect: playersToRemove.map((player) => ({ id: player.id })),
+          connect: playersToAdd.map((player) => ({ id: player.id })),
+        },
+      },
+      include: { players: true },
+    });
+
+    return updatedTeam;
   }
 
   async getTeam(id: string) {

@@ -1,4 +1,4 @@
-version: '3.9' # Use the latest version of the Docker Compose file format
+version: '4.0' # Use the latest version of the Docker Compose file format
 
 services:
   app:
@@ -9,7 +9,21 @@ services:
       - '3000:3000' # Map container port 3000 to host port 3000
     environment:
       - NODE_ENV=production
+    networks:
+      - app-network # Use the same network as the app to allow communication
     volumes:
       - .:/usr/src/app # Sync the app code for easier development
       - /usr/src/app/node_modules # Prevent node_modules from being overridden
     command: npm run start:prod # Command to run the NestJS app in production mode
+
+  redis:
+    image: redis:latest # Use the latest Redis image
+    container_name: redis
+    ports:
+      - '6379:6379' # Expose Redis on port 6379
+    networks:
+      - app-network # Use the same network as the app to allow communication
+
+networks:
+  app-network:
+    driver: bridge

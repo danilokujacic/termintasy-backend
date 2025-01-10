@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import { UserTeamService } from './user-team.service';
-import { CreateGameTeamDTO } from '../types';
+import { CreateGameTeamDTO, MakeTransferDTO } from '../types';
 
 @Controller('user-team')
 @UseGuards(AuthGuard)
@@ -19,6 +19,14 @@ export class UserTeamController {
   @Get('all')
   async getAllTeams() {
     return await this.userTeamService.getAllTeams();
+  }
+
+  @Post(':teamId/transfer-players')
+  async transferPlayers(
+    @Param('teamId') teamId: string,
+    @Body() playersForTransfer: MakeTransferDTO,
+  ) {
+    return this.userTeamService.makeTransfer(teamId, playersForTransfer);
   }
 
   @Get(':id')
