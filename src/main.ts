@@ -19,7 +19,7 @@ async function bootstrap() {
     .build();
   // Enable CORS with specific origin (only allow http://localhost:4200)
   app.enableCors({
-    origin: 'http://localhost:4200', // Allow only this origin
+    origin: 'https://app.terminta.xyz', // Allow only this origin
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Allowed HTTP methods
     allowedHeaders: '*', // Allowed headers
   });
