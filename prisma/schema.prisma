@@ -47,6 +47,8 @@ model GameStat {
   goal       Int      @default(0)   // Number of goals scored by the player in the game
   cleanSheet Int      @default(0)   // Clean sheet (1 if the player kept a clean sheet, 0 if not)
   assists    Int      @default(0)   // Number of assists made by the player
+  saves Int @default(0)
+  played Boolean @default(false)
   active Boolean @default(false)
   points Int @default(0)
   createdAt  DateTime @default(now())  // Timestamp when the record was created
