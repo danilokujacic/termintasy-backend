@@ -4,6 +4,8 @@ enum GameStat {
   GOAL = 'goal',
   ASSIST = 'assists',
   CLEANSHEET = 'cleanSheet',
+  SAVE = 'saves',
+  PLAYED = 'played',
 }
 
 enum Action {

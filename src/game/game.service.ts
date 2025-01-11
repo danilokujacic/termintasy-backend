@@ -125,7 +125,9 @@ export class GameService {
           points: 0,
           [gameStatDTO.gameStat]:
             gameStatDTO.action === 'increase'
-              ? gameState[gameStatDTO.gameStat] + 1
+              ? gameStatDTO.gameStat === 'played'
+                ? true
+                : gameState[gameStatDTO.gameStat] + 1
               : gameState[gameStatDTO.gameStat] - 1,
         },
       });
@@ -136,6 +138,8 @@ export class GameService {
           active: true,
           playerId: +playerId,
           points: 0,
+          saves: gameStatDTO.gameStat === 'saves' ? 1 : 0,
+          played: gameStatDTO.gameStat === 'played' ? true : false,
           goal: gameStatDTO.gameStat === 'goal' ? 1 : 0,
           assists: gameStatDTO.gameStat === 'assists' ? 1 : 0,
           cleanSheet: gameStatDTO.gameStat === 'cleanSheet' ? 1 : 0,

@@ -21,7 +21,9 @@ export class GameStatsProcessor extends WorkerHost {
     // Define the points for each statistic type
     const pointsForGoals = 5;
     const pointsForAssists = 3;
-    const pointsForCleanSheet = 2;
+    const pointsForCleanSheet = 6;
+    const pointsForSaves = 4;
+    const pointsForAttendance = 2;
 
     for (const stat of gameStats) {
       const { player, id } = stat;
@@ -30,9 +32,9 @@ export class GameStatsProcessor extends WorkerHost {
       const totalPoints =
         stat.goal * pointsForGoals +
         stat.assists * pointsForAssists +
-        stat.cleanSheet *
-          pointsForCleanSheet *
-          (player.position === 'DEF' || player.position === 'GK' ? 3 : 1);
+        (stat.saves >= 10 ? pointsForSaves : 0) +
+        stat.cleanSheet * pointsForCleanSheet +
+        (stat.played ? pointsForAttendance : 0);
 
       await this.prisma.gameStat.update({
         where: {
