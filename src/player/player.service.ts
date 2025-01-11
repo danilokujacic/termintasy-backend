@@ -22,7 +22,11 @@ export class PlayerService {
               ? (player.userTeams.length / totalUserTeams) * 100
               : 0,
         }))
-        .sort((a, b) => b.pickPercentage - a.pickPercentage);
+        .sort((a, b) => b.pickPercentage - a.pickPercentage)
+        .map((player) => ({
+          ...player,
+          pickPercentage: player.pickPercentage.toFixed(2),
+        }));
     }
     return players;
   }
@@ -60,6 +64,7 @@ export class PlayerService {
         id: playerId,
       },
       include: {
+        gameStats: true,
         userTeams: true,
       },
     });
@@ -68,6 +73,6 @@ export class PlayerService {
     const pickPercentage =
       totalUserTeams > 0 ? (player.userTeams.length / totalUserTeams) * 100 : 0;
 
-    return { pickPercentage, ...player };
+    return { pickPercentage: pickPercentage.toFixed(2), ...player };
   }
 }
