@@ -11,6 +11,9 @@ export class UserTeamService {
       orderBy: {
         points: 'desc',
       },
+      include: {
+        owner: true,
+      },
     });
 
     return teams;

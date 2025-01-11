@@ -19,7 +19,6 @@ export class GameController {
 
   @Get('all')
   async getGames() {
-    console.log('aaaffa');
     return await this.gameService.getAllGames();
   }
   @Get(':id')

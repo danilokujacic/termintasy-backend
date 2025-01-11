@@ -15,7 +15,7 @@ export class GameService {
   async getAllGames() {
     const games = await this.prisma.game.findMany({
       orderBy: {
-        matchDate: 'asc',
+        matchDate: 'desc',
       },
     });
     return games;
