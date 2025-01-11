@@ -6,10 +6,24 @@ import { CreatePlayerDTO, Position } from '../types';
 export class PlayerService {
   constructor(private prisma: PrismaService) {}
 
-  async getPlayers(position?: Position) {
-    const query = position ? { where: { position } } : undefined;
-    const players = await this.prisma.player.findMany(query);
+  async getPlayers(position?: Position, pickrate?: string) {
+    const players = await this.prisma.player.findMany({
+      where: position ? { position } : undefined,
+      include: pickrate ? { userTeams: true } : undefined,
+    });
+    if (pickrate === 'true') {
+      const totalUserTeams = await this.prisma.userTeam.count();
 
+      return players
+        .map((player) => ({
+          ...player,
+          pickPercentage:
+            totalUserTeams > 0
+              ? (player.userTeams.length / totalUserTeams) * 100
+              : 0,
+        }))
+        .sort((a, b) => b.pickPercentage - a.pickPercentage);
+    }
     return players;
   }
 
@@ -45,8 +59,15 @@ export class PlayerService {
       where: {
         id: playerId,
       },
+      include: {
+        userTeams: true,
+      },
     });
 
-    return player;
+    const totalUserTeams = await this.prisma.userTeam.count();
+    const pickPercentage =
+      totalUserTeams > 0 ? (player.userTeams.length / totalUserTeams) * 100 : 0;
+
+    return { pickPercentage, ...player };
   }
 }

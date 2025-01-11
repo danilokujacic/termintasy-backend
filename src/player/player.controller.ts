@@ -24,8 +24,11 @@ export class PlayerController {
   }
 
   @Get('all')
-  async getPlayers(@Query('position') position?: Position) {
-    return await this.playerService.getPlayers(position);
+  async getPlayers(
+    @Query('position') position?: Position,
+    @Query('withPickrate') pickrate?: string,
+  ) {
+    return await this.playerService.getPlayers(position, pickrate);
   }
 
   @Put(':id')
@@ -34,12 +37,12 @@ export class PlayerController {
   }
 
   @Delete(':id')
-  async deletePlayer(@Param() id: number) {
+  async deletePlayer(@Param('id') id: number) {
     return await this.playerService.deletePlayer(id);
   }
 
   @Get(':id')
-  async getPlayer(@Param() id: number) {
-    return await this.playerService.getPlayer(id);
+  async getPlayer(@Param('id') id: number) {
+    return await this.playerService.getPlayer(+id);
   }
 }
