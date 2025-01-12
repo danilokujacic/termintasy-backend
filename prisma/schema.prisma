@@ -55,6 +55,11 @@ model GameStat {
   updatedAt  DateTime @updatedAt      // Timestamp when the record was last updated
 }
 
+model NotificationToken {
+  id         Int      @id @default(autoincrement())  
+  token String
+}
+
 model Game {
   id         String       @id @default(uuid())
   homeTeamId String
