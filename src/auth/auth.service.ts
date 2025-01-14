@@ -66,7 +66,6 @@ export class AuthService {
       where: { email: loginDTO.email },
     });
 
-    console.log(user.password, loginDTO.password);
     const isSamePassword = await bcrypt.compare(
       loginDTO.password,
       user.password,
@@ -79,6 +78,7 @@ export class AuthService {
     const token = await this.jwtService.signAsync({
       sub: user.id,
       email: user.email,
+      admin: user.admin,
       username: user.username,
     });
 
@@ -110,6 +110,7 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       username: user.username,
+      admin: user.admin,
     });
 
     return token;

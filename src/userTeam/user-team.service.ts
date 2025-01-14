@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { CreateGameTeamDTO, MakeTransferDTO } from '../types';
 import { PrismaService } from '../prisma.service';
 
@@ -19,8 +23,25 @@ export class UserTeamService {
     return teams;
   }
 
-  async makeTransfer(teamId: string, transferDTO: MakeTransferDTO) {
+  async makeTransfer(
+    teamId: string,
+    transferDTO: MakeTransferDTO,
+    userId: number,
+  ) {
     const { players, playersToReceive } = transferDTO;
+
+    const user = await this.prismaService.user.findFirstOrThrow({
+      where: {
+        id: userId,
+      },
+      include: {
+        userTeam: true,
+      },
+    });
+
+    if (user.userTeam.id !== teamId) {
+      throw new BadRequestException('You are not owner of this team');
+    }
 
     // Step 1: Find the team by ID
     const team = await this.prismaService.userTeam.findUnique({
@@ -31,8 +52,6 @@ export class UserTeamService {
     if (!team) {
       throw new Error('Team not found');
     }
-
-    console.log(players, playersToReceive);
 
     // Step 2: Determine the players to remove and add
     const playersToRemove = team.players.filter((player) =>
@@ -66,6 +85,9 @@ export class UserTeamService {
       include: { players: true },
     });
 
+    console.log(
+      `[${user.username} - ${user.userTeam.name}] Made transfers. Players (${players}) for (${playersToReceive}) on date: ${new Date().toISOString()}`,
+    );
     return updatedTeam;
   }
 
@@ -100,7 +122,6 @@ export class UserTeamService {
       throw new ForbiddenException('User already has a team!');
     }
 
-    console.log(ownerId);
     return await this.prismaService.userTeam.create({
       data: {
         name: team.name,

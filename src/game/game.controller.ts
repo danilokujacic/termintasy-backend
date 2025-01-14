@@ -1,11 +1,23 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { CreateGameDTO, GameStatTypeDTO } from '../types';
 import { GameService } from './game.service';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { AdminGuard } from 'src/auth/admin.guard';
 
+@UseGuards(AuthGuard)
 @Controller('game')
 export class GameController {
   constructor(private gameService: GameService) {}
 
+  @UseGuards(AdminGuard)
   @Post('')
   async createGame(@Body() gameDTO: CreateGameDTO) {
     return await this.gameService.createGame(
@@ -34,6 +46,7 @@ export class GameController {
     return this.getPlayerGameStat(gameId, playerId);
   }
 
+  @UseGuards(AdminGuard)
   @Post(':gameId/update-game-stat/:playerId')
   async updateGameStat(
     @Param('gameId') gameId: string,
@@ -48,11 +61,15 @@ export class GameController {
       gameStatDTO,
     );
   }
+
+  @UseGuards(AdminGuard)
   @Delete(':gameId/end')
   async endGame(@Param('gameId') gameId: string) {
     await this.gameService.endGame(gameId);
     return { message: 'Game ending process started' };
   }
+
+  @UseGuards(AdminGuard)
   @Post(':gameId/summarize')
   async summarizeGame(@Param('gameId') gameId: string) {
     await this.gameService.summarizeGameStat(gameId);

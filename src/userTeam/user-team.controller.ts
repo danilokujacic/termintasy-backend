@@ -23,10 +23,15 @@ export class UserTeamController {
 
   @Post(':teamId/transfer-players')
   async transferPlayers(
+    @Req() request,
     @Param('teamId') teamId: string,
     @Body() playersForTransfer: MakeTransferDTO,
   ) {
-    return this.userTeamService.makeTransfer(teamId, playersForTransfer);
+    return this.userTeamService.makeTransfer(
+      teamId,
+      playersForTransfer,
+      request.user.sub,
+    );
   }
 
   @Get(':id')

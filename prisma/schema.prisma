@@ -20,6 +20,7 @@ model User {
   email    String
   password String?
   openid String?
+  admin Boolean @default(false)
 
   // Relation to UserTeam (not nullable)
   userTeam UserTeam? @relation("UserTeamOwner")
