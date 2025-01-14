@@ -1,3 +1,4 @@
+/** 
 const { PrismaClient } = require('@prisma/client');
 const dotenv = require('dotenv');
 
@@ -100,3 +101,4 @@ const prisma = new PrismaClient();
 
   console.info('Seed finished.');
 })();
+*/

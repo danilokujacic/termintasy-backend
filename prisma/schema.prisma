@@ -31,6 +31,7 @@ model Player {
   name       String    @unique
   position   Position
 
+  captainOf   UserTeam[]  @relation("TeamCaptain")
   gameTeams   GameTeam[] @relation("PlayerTeams")
 
   // Many-to-many relation with UserTeam
@@ -86,6 +87,10 @@ model UserTeam {
   ownerId   Int    @unique
   owner     User?   @relation("UserTeamOwner", fields: [ownerId], references: [id])
 
+
+// Relation for the team captain
+  captainId   Int?       // Optional at creation
+  captain     Player?    @relation("TeamCaptain", fields: [captainId], references: [id])
   // No need to add the `userTeam` field here as it's already in the User model
 }
 

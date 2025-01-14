@@ -23,6 +23,35 @@ export class UserTeamService {
     return teams;
   }
 
+  async setTeamCaptain(userTeamId: string, captainId: number) {
+    const userTeam = await this.prismaService.userTeam.findUnique({
+      where: { id: userTeamId },
+      include: { players: true }, // Include players to validate
+    });
+
+    if (!userTeam) {
+      throw new Error('UserTeam not found');
+    }
+
+    console.log(userTeam.players, captainId);
+    const isPlayerInTeam = userTeam.players.some(
+      (player) => player.id === +captainId,
+    );
+
+    if (!isPlayerInTeam) {
+      throw new Error('Player must be part of the team to be set as captain');
+    }
+
+    await this.prismaService.userTeam.update({
+      where: { id: userTeamId },
+      data: { captainId: +captainId },
+    });
+
+    console.log(
+      `Player with ID ${captainId} set as captain of UserTeam ${userTeamId}`,
+    );
+  }
+
   async makeTransfer(
     teamId: string,
     transferDTO: MakeTransferDTO,
@@ -95,6 +124,11 @@ export class UserTeamService {
     return this.prismaService.userTeam.findFirstOrThrow({
       where: { id },
       include: {
+        captain: {
+          select: {
+            id: true,
+          },
+        },
         players: {
           include: {
             gameStats: {
@@ -125,7 +159,14 @@ export class UserTeamService {
     return await this.prismaService.userTeam.create({
       data: {
         name: team.name,
-        ownerId: ownerId,
+        owner: {
+          connect: {
+            id: ownerId,
+          },
+        },
+        captain: {
+          connect: { id: team.players[0] as number },
+        },
         players: {
           connect: team.players.map((player) => ({ id: player })),
         },

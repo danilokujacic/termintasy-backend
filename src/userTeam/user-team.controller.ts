@@ -21,6 +21,14 @@ export class UserTeamController {
     return await this.userTeamService.getAllTeams();
   }
 
+  @Post(':teamId/set-captain/:playerId')
+  async setCaptain(
+    @Param('teamId') teamId: string,
+    @Param('playerId') playerId: number,
+  ) {
+    return this.userTeamService.setTeamCaptain(teamId, playerId);
+  }
+
   @Post(':teamId/transfer-players')
   async transferPlayers(
     @Req() request,
