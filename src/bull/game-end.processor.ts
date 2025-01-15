@@ -43,6 +43,27 @@ export class GameEndProcessor extends WorkerHost {
       },
     });
 
+    const freeHitTeam = await this.prisma.freeHitTeam.findMany({
+      include: {
+        userTeam: true,
+        players: true,
+      },
+    });
+
+    for (const freeHit of freeHitTeam) {
+      await this.prisma.userTeam.update({
+        where: {
+          id: freeHit.userTeam.id,
+        },
+        data: {
+          players: {
+            set: freeHit.players.map((player) => ({ id: player.id })), // Set the new players
+          },
+        },
+      });
+      await this.prisma.freeHitTeam.delete({ where: { id: freeHit.id } });
+    }
+
     // 3. Optionally, you could mark the game as inactive or update its status
     await this.prisma.game.update({
       where: { id: gameId },

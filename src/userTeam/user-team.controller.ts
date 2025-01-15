@@ -4,6 +4,8 @@ import {
   Get,
   Param,
   Post,
+  Put,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -21,6 +23,11 @@ export class UserTeamController {
     return await this.userTeamService.getAllTeams();
   }
 
+  @Put(':teamId/activate-triple-captain')
+  async activateTripleCaptain(@Param('teamId') teamId: string) {
+    return this.userTeamService.activateTripleCaptain(teamId);
+  }
+
   @Post(':teamId/set-captain/:playerId')
   async setCaptain(
     @Param('teamId') teamId: string,
@@ -34,11 +41,15 @@ export class UserTeamController {
     @Req() request,
     @Param('teamId') teamId: string,
     @Body() playersForTransfer: MakeTransferDTO,
+    @Query('freeHit') freeHit?: string,
+    @Query('wildCard') wildCard?: string,
   ) {
     return this.userTeamService.makeTransfer(
       teamId,
       playersForTransfer,
       request.user.sub,
+      freeHit === 'true',
+      wildCard === 'true',
     );
   }
 

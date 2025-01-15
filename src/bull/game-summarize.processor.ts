@@ -55,23 +55,21 @@ export class GameStatsProcessor extends WorkerHost {
         .userTeams();
 
       for (const team of userTeams) {
-        if (team.captainId === player.id) {
-          await this.prisma.gameStat.update({
-            where: { id },
-            data: {
-              points: {
-                multiply: 2,
-              },
-            },
-          });
-        }
         // Update points for each UserTeam
         await this.prisma.userTeam.update({
           where: { id: team.id },
           data: {
+            tripleCaptain: {
+              decrement: team.tripleCaptainActive ? 1 : 0,
+            },
+            tripleCaptainActive: false,
             points:
               team.points +
-              (team.captainId === player.id ? totalPoints * 2 : totalPoints),
+              (team.captainId === player.id
+                ? team.tripleCaptainActive
+                  ? totalPoints * 3
+                  : totalPoints * 2
+                : totalPoints),
           },
         });
       }

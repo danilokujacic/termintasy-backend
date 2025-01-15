@@ -23,6 +23,27 @@ export class UserTeamService {
     return teams;
   }
 
+  async activateTripleCaptain(teamId: string) {
+    const team = await this.prismaService.userTeam.findFirst({
+      where: {
+        id: teamId,
+      },
+    });
+
+    if (!team.tripleCaptain) {
+      throw new ForbiddenException('You dont have triple captains');
+    }
+
+    return this.prismaService.userTeam.update({
+      where: {
+        id: teamId,
+      },
+      data: {
+        tripleCaptainActive: true,
+      },
+    });
+  }
+
   async setTeamCaptain(userTeamId: string, captainId: number) {
     const userTeam = await this.prismaService.userTeam.findUnique({
       where: { id: userTeamId },
@@ -33,7 +54,6 @@ export class UserTeamService {
       throw new Error('UserTeam not found');
     }
 
-    console.log(userTeam.players, captainId);
     const isPlayerInTeam = userTeam.players.some(
       (player) => player.id === +captainId,
     );
@@ -56,6 +76,8 @@ export class UserTeamService {
     teamId: string,
     transferDTO: MakeTransferDTO,
     userId: number,
+    freeHit: boolean,
+    wildCard: boolean,
   ) {
     const { players, playersToReceive } = transferDTO;
 
@@ -82,6 +104,18 @@ export class UserTeamService {
       throw new Error('Team not found');
     }
 
+    if (freeHit) {
+      await this.prismaService.freeHitTeam.create({
+        data: {
+          userTeam: {
+            connect: { id: team.id },
+          },
+          players: {
+            connect: team.players.map((player) => ({ id: player.id })),
+          },
+        },
+      });
+    }
     // Step 2: Determine the players to remove and add
     const playersToRemove = team.players.filter((player) =>
       players.includes(player.id),
@@ -100,12 +134,24 @@ export class UserTeamService {
       data: {
         points: {
           decrement:
-            playersToReceive.length - team.transfers < 0
+            freeHit || wildCard
               ? 0
-              : (playersToReceive.length - team.transfers) * 4,
+              : playersToReceive.length - team.transfers < 0
+                ? 0
+                : (playersToReceive.length - team.transfers) * 4,
+        },
+        freeHit: {
+          decrement: freeHit ? 1 : 0,
+        },
+        wildCard: {
+          decrement: wildCard ? 1 : 0,
         },
         transfers:
-          receivePlayersTransfersDiff < 0 ? 0 : receivePlayersTransfersDiff,
+          freeHit || wildCard
+            ? team.transfers
+            : receivePlayersTransfersDiff < 0
+              ? 0
+              : receivePlayersTransfersDiff,
         players: {
           disconnect: playersToRemove.map((player) => ({ id: player.id })),
           connect: playersToAdd.map((player) => ({ id: player.id })),

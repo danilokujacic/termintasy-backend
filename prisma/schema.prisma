@@ -36,6 +36,7 @@ model Player {
 
   // Many-to-many relation with UserTeam
   userTeams  UserTeam[] @relation("PlayerUserTeams")
+  freeHitTeams FreeHitTeam[] @relation("PlayerFreeHitTeams")
 
   gameStats  GameStat[] // Relation to GameStats (all stats of the player)
 }
@@ -78,6 +79,13 @@ model Game {
   summarized Boolean @default(false)
 }
 
+model FreeHitTeam {
+  id Int @id @default(autoincrement())
+  userTeamId String? @unique
+  userTeam UserTeam? @relation("UserTeamFreeHitTeam", fields: [userTeamId], references: [id])
+  players   Player[]  @relation("PlayerFreeHitTeams")
+}
+
 model UserTeam {
   id        String @id @default(uuid())
   name      String
@@ -87,6 +95,11 @@ model UserTeam {
   ownerId   Int    @unique
   owner     User?   @relation("UserTeamOwner", fields: [ownerId], references: [id])
 
+  freeHitTeam FreeHitTeam? @relation("UserTeamFreeHitTeam")
+  tripleCaptainActive Boolean @default(false)
+  tripleCaptain Int @default(1)
+  freeHit Int @default(1)
+  wildCard Int @default(1)
 
 // Relation for the team captain
   captainId   Int?       // Optional at creation
