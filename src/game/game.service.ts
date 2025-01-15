@@ -12,6 +12,15 @@ export class GameService {
     @InjectQueue('gameEndQueue') private gameEndQueue: Queue,
   ) {}
 
+  async startGame(gameId: string) {
+    return this.prisma.game.update({
+      where: { id: gameId },
+      data: {
+        active: true,
+      },
+    });
+  }
+
   async getAllGames() {
     const games = await this.prisma.game.findMany({
       orderBy: {
@@ -19,6 +28,22 @@ export class GameService {
       },
     });
     return games;
+  }
+
+  async getActiveGame() {
+    const game = await this.prisma.game.findFirst({
+      where: {
+        active: true,
+      },
+    });
+    if (!game) {
+      return {
+        game: null,
+      };
+    }
+    return {
+      game,
+    };
   }
 
   async endGame(gameId: string) {

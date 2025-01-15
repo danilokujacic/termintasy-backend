@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { CreateGameDTO, GameStatTypeDTO } from '../types';
@@ -29,6 +30,16 @@ export class GameController {
     );
   }
 
+  @UseGuards(AdminGuard)
+  @Get('active-game')
+  async getActiveGame() {
+    return await this.gameService.getActiveGame();
+  }
+
+  @Put(':gameId/start-game')
+  async startGame(@Param('gameId') gameId: string) {
+    return this.gameService.startGame(gameId);
+  }
   @Get('all')
   async getGames() {
     return await this.gameService.getAllGames();
