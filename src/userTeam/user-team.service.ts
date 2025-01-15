@@ -23,6 +23,17 @@ export class UserTeamService {
     return teams;
   }
 
+  async deactivateTripleCaptain(teamid: string) {
+    return this.prismaService.userTeam.update({
+      where: {
+        id: teamid,
+      },
+      data: {
+        tripleCaptainActive: false,
+      },
+    });
+  }
+
   async activateTripleCaptain(teamId: string) {
     const team = await this.prismaService.userTeam.findFirst({
       where: {

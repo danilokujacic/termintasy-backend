@@ -27,6 +27,10 @@ export class UserTeamController {
   async activateTripleCaptain(@Param('teamId') teamId: string) {
     return this.userTeamService.activateTripleCaptain(teamId);
   }
+  @Put(':teamId/deactivate-triple-captain')
+  async deactivateTripleCaptain(@Param('teamId') teamId: string) {
+    return this.userTeamService.deactivateTripleCaptain(teamId);
+  }
 
   @Post(':teamId/set-captain/:playerId')
   async setCaptain(
