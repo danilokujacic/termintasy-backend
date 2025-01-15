@@ -30,7 +30,6 @@ export class GameController {
     );
   }
 
-  @UseGuards(AdminGuard)
   @Get('active-game')
   async getActiveGame() {
     return await this.gameService.getActiveGame();
