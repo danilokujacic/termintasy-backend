@@ -32,12 +32,7 @@ const prisma = new PrismaClient();
         'https://res.cloudinary.com/dlryrlcb1/image/upload/v1736983941/paka_mp1qnf.png',
     },
     {
-      name: 'Vidak Buskovic',
-      image:
-        'https://res.cloudinary.com/dlryrlcb1/image/upload/v1736983941/idzo_xicyvw.png',
-    },
-    {
-      name: 'Ivan Bojanovic',
+      name: 'Ivan Jovanovic',
       image:
         'https://res.cloudinary.com/dlryrlcb1/image/upload/v1736983941/ivo_nhqtny.png',
     },
