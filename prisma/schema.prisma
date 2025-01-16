@@ -38,6 +38,8 @@ model Player {
   userTeams  UserTeam[] @relation("PlayerUserTeams")
   freeHitTeams FreeHitTeam[] @relation("PlayerFreeHitTeams")
 
+
+  image String?
   gameStats  GameStat[] // Relation to GameStats (all stats of the player)
 }
 
