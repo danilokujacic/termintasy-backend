@@ -1,8 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { GameStatTypeDTO } from '../types';
+import { GameStatTypeDTO, GameTeamTransferDTO } from '../types';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
+import { GameStat } from '@prisma/client';
 
 @Injectable()
 export class GameService {
@@ -11,6 +16,74 @@ export class GameService {
     @InjectQueue('gameStatsQueue') private gameStateQueue: Queue,
     @InjectQueue('gameEndQueue') private gameEndQueue: Queue,
   ) {}
+
+  async transferPlayers(gameId: string, transferDTO: GameTeamTransferDTO) {
+    const { homePlayers, awayPlayers } = transferDTO;
+    const game = await this.prisma.game.findFirst({
+      where: {
+        id: gameId,
+      },
+      include: {
+        homeTeam: {
+          include: {
+            players: true,
+          },
+        },
+        awayTeam: {
+          include: {
+            players: true,
+          },
+        },
+      },
+    });
+
+    if (!game) {
+      throw new NotFoundException('Game not found');
+    }
+
+    const gameHomePlayers = game.homeTeam.players;
+    const gameAwayPlayers = game.awayTeam.players;
+    if (
+      gameHomePlayers.some(
+        (player) => homePlayers.findIndex((el) => el === player.id) === -1,
+      ) ||
+      gameAwayPlayers.some(
+        (player) => awayPlayers.findIndex((el) => el === player.id) === -1,
+      )
+    ) {
+      throw new NotFoundException('Player not exist');
+    }
+
+    const homeTeamId = game.homeTeam.id;
+    const awayTeamId = game.awayTeam.id;
+
+    await this.prisma.$transaction(
+      homePlayers.map((player) =>
+        this.prisma.player.update({
+          where: { id: player },
+          data: {
+            gameTeams: {
+              disconnect: { id: homeTeamId },
+              connect: { id: awayTeamId },
+            },
+          },
+        }),
+      ),
+    );
+    await this.prisma.$transaction(
+      awayPlayers.map((player) =>
+        this.prisma.player.update({
+          where: { id: player },
+          data: {
+            gameTeams: {
+              disconnect: { id: awayTeamId },
+              connect: { id: homeTeamId },
+            },
+          },
+        }),
+      ),
+    );
+  }
 
   async startGame(gameId: string) {
     return this.prisma.game.update({
@@ -130,16 +203,26 @@ export class GameService {
     }
   }
 
+  // async updateUserTeamsByGameStat(gameStat: GameStat) {
+  //   return await this.prisma.userTeam.update({
+  //     where: {
+  //       players: {
+  //         some: { id: gameStat.playerId },
+  //       },
+  //     },
+  //   });
+  // }
+
   async updateGameStat(
     gameId: string,
     playerId: number,
     gameState: any,
     gameStatDTO: GameStatTypeDTO,
   ) {
-    let gameStat;
+    let gameStat: GameStat | null = null;
 
     if (gameState?.id) {
-      gameStat = this.prisma.gameStat.update({
+      gameStat = await this.prisma.gameStat.update({
         where: {
           playerId: +playerId,
           gameId,
@@ -148,26 +231,19 @@ export class GameService {
         data: {
           active: true,
           points: 0,
-          [gameStatDTO.gameStat]:
-            gameStatDTO.action === 'increase'
-              ? gameStatDTO.gameStat === 'played'
-                ? true
-                : gameState[gameStatDTO.gameStat] + 1
-              : gameState[gameStatDTO.gameStat] - 1,
+          [gameStatDTO.type]:
+            gameStatDTO.type === 'played' ? true : gameStatDTO.value,
         },
       });
     } else {
-      gameStat = this.prisma.gameStat.create({
+      gameStat = await this.prisma.gameStat.create({
         data: {
           gameId,
           active: true,
           playerId: +playerId,
           points: 0,
-          saves: gameStatDTO.gameStat === 'saves' ? 1 : 0,
-          played: gameStatDTO.gameStat === 'played' ? true : false,
-          goal: gameStatDTO.gameStat === 'goal' ? 1 : 0,
-          assists: gameStatDTO.gameStat === 'assists' ? 1 : 0,
-          cleanSheet: gameStatDTO.gameStat === 'cleanSheet' ? 1 : 0,
+          [gameStatDTO.type]:
+            gameStatDTO.type === 'played' ? true : gameStatDTO.value,
         },
       });
     }

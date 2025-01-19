@@ -8,15 +8,10 @@ enum GameStat {
   PLAYED = 'played',
 }
 
-enum Action {
-  INCREASE = 'increase',
-  DECREASE = 'decrease',
-}
-
 export class GameStatTypeDTO {
   @IsNotEmpty()
-  gameStat: GameStat;
+  type: GameStat;
 
   @IsNotEmpty()
-  action: Action;
+  value: number;
 }
