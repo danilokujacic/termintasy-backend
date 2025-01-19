@@ -126,11 +126,10 @@ export class GameService {
     return this.gameStateQueue.add('summarize_game', { gameId });
   }
 
-  async createTeam(name: string, players: number[]) {
-    console.log(name);
+  async createTeam(players: number[]) {
     const team = await this.prisma.gameTeam.create({
       data: {
-        name,
+        name: null,
         players: {
           connect: players.map((player) => ({ id: player })),
         },
@@ -147,8 +146,8 @@ export class GameService {
     awayTeamPlayers: number[],
     gameDate: string,
   ) {
-    const homeTeam = await this.createTeam(homeTeamName, homeTeamPlayers);
-    const awayTeam = await this.createTeam(awayTeamName, awayTeamPlayers);
+    const homeTeam = await this.createTeam(homeTeamPlayers);
+    const awayTeam = await this.createTeam(awayTeamPlayers);
 
     const game = await this.prisma.game.create({
       data: {
