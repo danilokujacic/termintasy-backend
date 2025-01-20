@@ -15,7 +15,7 @@ export default async function calculateGrade() {
       gameStat.assists >= 3 ||
       gameStat.cleanSheet >= 1
     ) {
-      return await this.prisma.gameStat.update({
+      return await prisma.gameStat.update({
         where: { id: gameStat.id },
         data: {
           grade: 'S',
@@ -26,14 +26,14 @@ export default async function calculateGrade() {
       (position === 'GK' && gameStat.saves >= 10) ||
       gameStat.assists >= 1
     ) {
-      return await this.prisma.gameStat.update({
+      return await prisma.gameStat.update({
         where: { id: gameStat.id },
         data: {
           grade: 'A',
         },
       });
     } else {
-      return await this.prisma.gameStat.update({
+      return await prisma.gameStat.update({
         where: { id: gameStat.id },
         data: {
           grade: 'F',
