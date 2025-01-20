@@ -1,8 +1,5 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '../prisma.service';
 import { GameStatTypeDTO, GameTeamTransferDTO } from '../types';
 import { InjectQueue } from '@nestjs/bullmq';
@@ -15,6 +12,7 @@ export class GameService {
     private prisma: PrismaService,
     @InjectQueue('gameStatsQueue') private gameStateQueue: Queue,
     @InjectQueue('gameEndQueue') private gameEndQueue: Queue,
+    @InjectQueue('gameStartProcessor') private gameStartQueue: Queue,
   ) {}
 
   async transferPlayers(gameId: string, transferDTO: GameTeamTransferDTO) {
@@ -164,7 +162,19 @@ export class GameService {
         },
       },
     });
-
+    const activationTime = new Date(
+      new Date(gameDate).getTime() - 60 * 60 * 1000,
+    );
+    await this.gameStartQueue.add(
+      'start_game',
+      { gameId: game.id }, // Job data
+      { delay: activationTime.getTime() - Date.now() }, // Delay until activation time
+    );
+    await this.gameEndQueue.add(
+      'end_game',
+      { gameId: game.id }, // Job data
+      { delay: new Date(gameDate).getTime() + 1 * 24 * 60 * 60 * 1000 }, // Delay until end time
+    );
     return game;
   }
   async getGame(id: string) {

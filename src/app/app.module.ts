@@ -5,12 +5,14 @@ import { AuthModule } from '../auth/auth.module';
 import { AuthGuard } from '../auth/auth.guard';
 import { PlayerModule } from '../player/player.module';
 import { GameModule } from '../game/game.module';
+import { ScheduleModule } from '@nestjs/schedule';
 import { UserTeamModule } from '../userTeam/user-team.module';
 import { BullModule } from '@nestjs/bullmq';
 import { PushNotificationModule } from 'src/push-notification/push-notification.module';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     BullModule.forRoot({
       connection: {
         host: 'redis',
