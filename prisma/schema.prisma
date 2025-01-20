@@ -37,7 +37,7 @@ model Player {
   // Many-to-many relation with UserTeam
   userTeams  UserTeam[] @relation("PlayerUserTeams")
   freeHitTeams FreeHitTeam[] @relation("PlayerFreeHitTeams")
-    grade String @default('F')
+  grade String @default('F')
 
   image String?
   gameStats  GameStat[] // Relation to GameStats (all stats of the player)
