@@ -9,36 +9,52 @@ export default async function calculateGrade() {
   for (const gameStat of gameStats) {
     const { position } = gameStat.player;
 
-    if (
-      gameStat.goal >= 5 ||
-      (position === 'GK' && gameStat.saves >= 15) ||
-      gameStat.assists >= 3 ||
-      gameStat.cleanSheet >= 1
-    ) {
-      await prisma.gameStat.update({
-        where: { id: gameStat.id },
-        data: {
-          grade: 'S',
-        },
-      });
-    } else if (
-      gameStat.goal >= 2 ||
-      (position === 'GK' && gameStat.saves >= 10) ||
-      gameStat.assists >= 1
-    ) {
-      await prisma.gameStat.update({
-        where: { id: gameStat.id },
-        data: {
-          grade: 'A',
-        },
-      });
+    if (position === 'GK') {
+      if (gameStat.saves > 15) {
+        await prisma.gameStat.update({
+          where: { id: gameStat.id },
+          data: {
+            grade: 'S',
+          },
+        });
+      } else if (gameStat.saves > 10) {
+        await prisma.gameStat.update({
+          where: { id: gameStat.id },
+          data: {
+            grade: 'A',
+          },
+        });
+      } else {
+        await prisma.gameStat.update({
+          where: { id: gameStat.id },
+          data: {
+            grade: 'F',
+          },
+        });
+      }
     } else {
-      await prisma.gameStat.update({
-        where: { id: gameStat.id },
-        data: {
-          grade: 'F',
-        },
-      });
+      if (gameStat.points > 40) {
+        await prisma.gameStat.update({
+          where: { id: gameStat.id },
+          data: {
+            grade: 'S',
+          },
+        });
+      } else if (gameStat.points > 25) {
+        await prisma.gameStat.update({
+          where: { id: gameStat.id },
+          data: {
+            grade: 'A',
+          },
+        });
+      } else {
+        await prisma.gameStat.update({
+          where: { id: gameStat.id },
+          data: {
+            grade: 'F',
+          },
+        });
+      }
     }
   }
 }
