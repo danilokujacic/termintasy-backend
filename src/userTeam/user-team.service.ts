@@ -148,7 +148,7 @@ export class UserTeamService {
                     team.transfers -
                     playersToRemove.filter((player) => player.position === 'GK')
                       .length) *
-                  4,
+                  10,
         },
         freeHit: {
           decrement: freeHit ? 1 : 0,
