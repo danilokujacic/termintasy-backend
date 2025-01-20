@@ -61,6 +61,3 @@ export default async function calculatePlayerGrades(): Promise<void> {
 
   console.log('Player grades updated successfully!');
 }
-
-// Call the function to calculate grades
-calculatePlayerGrades();
