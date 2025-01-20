@@ -49,3 +49,4 @@ export default async function calculatePlayerGrades(): Promise<void> {
 
   console.log('Player grades updated successfully!');
 }
+calculatePlayerGrades();
