@@ -11,8 +11,8 @@ export default async function calculatePlayerGrades(): Promise<void> {
       },
     });
 
-  // Define a function to determine the overall grade
-  function determineOverallGrade(grades: string[]): string {
+  // Define a function to determine the overall grade based on the number of games
+  function determineOverallGrade(grades: string[], numGames: number): string {
     // Count occurrences of each grade
     const gradeCounts: Record<string, number> = grades.reduce(
       (counts, grade) => {
@@ -21,6 +21,15 @@ export default async function calculatePlayerGrades(): Promise<void> {
       },
       {} as Record<string, number>,
     );
+
+    // Logic to determine overall grade based on the number of games played
+    // If a player has less than 3 games, we'll limit their grade to "A" or below
+    if (numGames < 3) {
+      if (gradeCounts['S'] && gradeCounts['S'] > 0) {
+        return 'A'; // A player with 1 or 2 games cannot have an "S" grade
+      }
+      return gradeCounts['A'] ? 'A' : 'F'; // If no S grade, default to A or F
+    }
 
     // Sort grades by frequency and priority (S > A > F)
     const sortedGrades = Object.entries(gradeCounts).sort(
@@ -37,8 +46,11 @@ export default async function calculatePlayerGrades(): Promise<void> {
     const grades: string[] = player.gameStats
       .map((stat) => stat.grade)
       .filter((grade) => grade); // Get all grades
+
+    const numGames = player.gameStats.filter((stat) => stat.played).length; // Count the number of games played
+
     if (grades.length > 0) {
-      const overallGrade: string = determineOverallGrade(grades);
+      const overallGrade: string = determineOverallGrade(grades, numGames);
 
       await prisma.player.update({
         where: { id: player.id },
@@ -49,4 +61,6 @@ export default async function calculatePlayerGrades(): Promise<void> {
 
   console.log('Player grades updated successfully!');
 }
+
+// Call the function to calculate grades
 calculatePlayerGrades();
