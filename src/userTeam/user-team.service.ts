@@ -126,7 +126,9 @@ export class UserTeamService {
     });
 
     const receivePlayersTransfersDiff =
-      team.transfers - playersToReceive.length;
+      team.transfers -
+      playersToReceive.length +
+      playersToRemove.filter((player) => player.position === 'GK').length;
 
     // Step 3: Update the team
     const updatedTeam = await this.prismaService.userTeam.update({
@@ -136,9 +138,17 @@ export class UserTeamService {
           decrement:
             freeHit || wildCard
               ? 0
-              : playersToReceive.length - team.transfers < 0
+              : playersToReceive.length -
+                    team.transfers -
+                    playersToRemove.filter((player) => player.position === 'GK')
+                      .length <
+                  0
                 ? 0
-                : (playersToReceive.length - team.transfers) * 4,
+                : (playersToReceive.length -
+                    team.transfers -
+                    playersToRemove.filter((player) => player.position === 'GK')
+                      .length) *
+                  4,
         },
         freeHit: {
           decrement: freeHit ? 1 : 0,
