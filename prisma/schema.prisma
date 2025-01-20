@@ -37,7 +37,7 @@ model Player {
   // Many-to-many relation with UserTeam
   userTeams  UserTeam[] @relation("PlayerUserTeams")
   freeHitTeams FreeHitTeam[] @relation("PlayerFreeHitTeams")
-
+  grade String
 
   image String?
   gameStats  GameStat[] // Relation to GameStats (all stats of the player)
@@ -53,6 +53,7 @@ model GameStat {
   cleanSheet Int      @default(0)   // Clean sheet (1 if the player kept a clean sheet, 0 if not)
   assists    Int      @default(0)   // Number of assists made by the player
   saves Int @default(0)
+  grade String
   played Boolean @default(false)
   active Boolean @default(false)
   points Int @default(0)
