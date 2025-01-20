@@ -38,6 +38,8 @@ model Player {
   userTeams  UserTeam[] @relation("PlayerUserTeams")
   freeHitTeams FreeHitTeam[] @relation("PlayerFreeHitTeams")
 
+
+  image String?
   gameStats  GameStat[] // Relation to GameStats (all stats of the player)
 }
 
@@ -109,7 +111,7 @@ model UserTeam {
 
 model GameTeam {
   id        String       @id @default(uuid())
-  name      String    @unique
+  name      String?  
   players   Player[]  @relation("PlayerTeams")// Players associated with the team
   homeGames Game[]    @relation("HomeGames") // Games where this team is the home team
   awayGames Game[]    @relation("AwayGames") // Games where this team is the away team

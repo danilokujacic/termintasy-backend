@@ -22,7 +22,7 @@ export class GameStatsProcessor extends WorkerHost {
     const pointsForGoals = 5;
     const pointsForAssists = 3;
     const pointsForCleanSheet = 6;
-    const pointsForSaves = 4;
+    const pointsForSaves = 10;
     const pointsForAttendance = 2;
 
     for (const stat of gameStats) {
@@ -32,7 +32,7 @@ export class GameStatsProcessor extends WorkerHost {
       const totalPoints =
         stat.goal * pointsForGoals +
         stat.assists * pointsForAssists +
-        (stat.saves >= 10 ? pointsForSaves : 0) +
+        (stat.saves >= 15 ? pointsForSaves : 0) +
         stat.cleanSheet * pointsForCleanSheet +
         (stat.played ? pointsForAttendance : 0);
 

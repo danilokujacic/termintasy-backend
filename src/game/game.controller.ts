@@ -8,7 +8,7 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { CreateGameDTO, GameStatTypeDTO } from '../types';
+import { CreateGameDTO, GameStatTypeDTO, GameTeamTransferDTO } from '../types';
 import { GameService } from './game.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { AdminGuard } from 'src/auth/admin.guard';
@@ -70,6 +70,15 @@ export class GameController {
       gameState,
       gameStatDTO,
     );
+  }
+
+  @UseGuards(AdminGuard)
+  @Put(':gameId/transfer-players')
+  async updateGamePlayers(
+    @Param('gameId') gameId: string,
+    @Body() transferDTO: GameTeamTransferDTO,
+  ) {
+    return await this.gameService.transferPlayers(gameId, transferDTO);
   }
 
   @UseGuards(AdminGuard)
