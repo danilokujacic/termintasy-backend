@@ -33,14 +33,14 @@ export default async function calculateGrade() {
         });
       }
     } else {
-      if (gameStat.points > 40) {
+      if (gameStat.points > 30) {
         await prisma.gameStat.update({
           where: { id: gameStat.id },
           data: {
             grade: 'S',
           },
         });
-      } else if (gameStat.points > 25) {
+      } else if (gameStat.points > 15) {
         await prisma.gameStat.update({
           where: { id: gameStat.id },
           data: {
