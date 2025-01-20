@@ -43,15 +43,26 @@ export default async function calculatePlayerGrades(): Promise<void> {
 
   // Calculate and update each player's grade
   for (const player of players) {
-    const grades: string[] = player.gameStats
+    // Sort gameStats by date (assuming `gameDate` or `createdAt` field exists)
+    const sortedGameStats = player.gameStats.sort((a, b) => {
+      // Ensure that the date field is used for sorting (adjust field if necessary)
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(); // Sort in descending order
+    });
+
+    // Get the last 3 games (slice only the first 3 most recent games)
+    const lastThreeGames = sortedGameStats.slice(0, 3);
+
+    // Get grades of the last 3 games
+    const grades: string[] = lastThreeGames
       .map((stat) => stat.grade)
       .filter((grade) => grade); // Get all grades
 
-    const numGames = player.gameStats.filter((stat) => stat.played).length; // Count the number of games played
+    const numGames = lastThreeGames.filter((stat) => stat.played).length; // Count the number of games played
 
     if (grades.length > 0) {
       const overallGrade: string = determineOverallGrade(grades, numGames);
 
+      // Update the player's overall grade
       await prisma.player.update({
         where: { id: player.id },
         data: { grade: overallGrade },
