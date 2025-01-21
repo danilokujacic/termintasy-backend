@@ -147,6 +147,13 @@ export class GameService {
     const homeTeam = await this.createTeam(homeTeamPlayers);
     const awayTeam = await this.createTeam(awayTeamPlayers);
 
+    await this.prisma.player.updateMany({
+      where: { id: { in: [...homeTeamPlayers, ...awayTeamPlayers] } },
+      data: {
+        inGame: true,
+      },
+    });
+
     const game = await this.prisma.game.create({
       data: {
         matchDate: gameDate,

@@ -39,6 +39,8 @@ model Player {
   freeHitTeams FreeHitTeam[] @relation("PlayerFreeHitTeams")
   grade String @default("F")
 
+  inGame Boolean @default(false)
+
   image String?
   gameStats  GameStat[] // Relation to GameStats (all stats of the player)
 }
