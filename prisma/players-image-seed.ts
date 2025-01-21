@@ -5,95 +5,80 @@ dotenv.config();
 
 const prisma = new PrismaClient();
 (async () => {
-  const playerImages = [
+  const playerNicknamess = [
     {
       name: 'Stefan Ilic',
-      image:
-        'https://res.cloudinary.com/dlryrlcb1/image/upload/v1736983941/stipe_ismuwn.png',
+      nicknames: 'stivi,skakaneli,stipe',
     },
-    {
-      name: 'Ilija Brankovic',
-      image:
-        'https://res.cloudinary.com/dlryrlcb1/image/upload/v1736989345/ilija_vi4ea3.png',
-    },
-    {
-      name: 'Simke',
-      image:
-        'https://res.cloudinary.com/dlryrlcb1/image/upload/v1736989345/simke_yufpef.png',
-    },
+    // {
+    //   name: 'Ilija Brankovic',
+    //   nicknames: 'idzo',
+    // },
+    // {
+    //   name: 'Simke',
+    //   nicknames: 'simke,simi',
+    // },
     {
       name: 'Djordjije Vujovic',
-      image:
-        'https://res.cloudinary.com/dlryrlcb1/image/upload/v1736983941/djole_r3vrpb.png',
+      nicknames: 'djole',
     },
     {
       name: 'Pavle Mrakovic',
-      image:
-        'https://res.cloudinary.com/dlryrlcb1/image/upload/v1736983941/paka_mp1qnf.png',
+      nicknames: 'paka,mrak',
     },
     {
-      name: 'Ivan Jovanovic',
-      image:
-        'https://res.cloudinary.com/dlryrlcb1/image/upload/v1736983941/ivo_nhqtny.png',
+      name: 'Ivan Bojanovic',
+      nicknames: 'ivo,ibo',
     },
     {
       name: 'Petar Lekovic',
-      image:
-        'https://res.cloudinary.com/dlryrlcb1/image/upload/v1736983941/leko_pntqsf.png',
+      nicknames: 'leko,pero',
     },
     {
       name: 'Aleksandar Stevanovic',
-      image:
-        'https://res.cloudinary.com/dlryrlcb1/image/upload/v1736983940/sale_xqc2bz.png',
+      nicknames: 'sale,sasa',
     },
     {
       name: 'Andrija Filipovic',
-      image:
-        'https://res.cloudinary.com/dlryrlcb1/image/upload/v1736987628/andrija_f_zatnj0.png',
+      nicknames: 'ada',
     },
     {
       name: 'Matija Filipovic',
-      image:
-        'https://res.cloudinary.com/dlryrlcb1/image/upload/v1736987627/matija_f_n12bc1.png',
+      nicknames: 'matija',
     },
     {
       name: 'Aleksandar Buskovic',
-      image:
-        'https://res.cloudinary.com/dlryrlcb1/image/upload/v1736987628/buske_b3wzmk.png',
+      nicknames: 'buske,aco',
     },
     {
       name: 'Nikola Burzanovic',
-      image:
-        'https://res.cloudinary.com/dlryrlcb1/image/upload/v1736987627/burzo_nqpswa.png',
+      nicknames: 'burzo,dzoni',
     },
     {
       name: 'Andrija Vujovic',
-      image:
-        'https://res.cloudinary.com/dlryrlcb1/image/upload/v1736988696/drki_s4muab.png',
+      nicknames: 'drki',
     },
     {
       name: 'Aleksandar Radosevic',
-      image:
-        'https://res.cloudinary.com/dlryrlcb1/image/upload/v1736988696/rale_tbolgc.png',
+      nicknames: 'rados,rale',
     },
     {
       name: 'Danilo Kujacic',
-      image:
-        'https://res.cloudinary.com/dlryrlcb1/image/upload/v1736988696/kuki_woudlp.png',
+      nicknames: 'kujo,kuki,kujaca',
     },
     {
       name: 'Matija Sofranac',
-      image:
-        'https://res.cloudinary.com/dlryrlcb1/image/upload/v1736983940/sole_fdpyvc.png',
+      nicknames: 'sole',
     },
   ];
-  for (const player of playerImages) {
+  for (const player of playerNicknamess) {
+    console.log(player.name);
     await prisma.player.update({
       where: {
         name: player.name,
       },
       data: {
-        image: player.image,
+        nicknames: player.nicknames,
       },
     });
   }

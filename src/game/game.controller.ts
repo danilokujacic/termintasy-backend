@@ -31,6 +31,16 @@ export class GameController {
   }
 
   @Get('active-game')
+  async findActiveGame() {
+    return this.gameService.findActiveGame();
+  }
+
+  @Post('generate-player-stats')
+  async ai(@Body() request: any) {
+    return await this.gameService.ai(request.prompt);
+  }
+
+  @Get('active-game')
   async getActiveGame() {
     return await this.gameService.getActiveGame();
   }
@@ -56,8 +66,8 @@ export class GameController {
     return this.getPlayerGameStat(gameId, playerId);
   }
 
-  @UseGuards(AdminGuard)
-  @Post(':gameId/update-game-stat/:playerId')
+  // @UseGuards(AdminGuard)
+  @Post(':gameId/game-stat/:playerId')
   async updateGameStat(
     @Param('gameId') gameId: string,
     @Param('playerId') playerId: number,
@@ -94,5 +104,16 @@ export class GameController {
     await this.gameService.summarizeGameStat(gameId);
 
     return { message: 'Game summarization process started' };
+  }
+  @Put(':gameId/update-score')
+  async updateScore(
+    @Param('gameId') gameId: string,
+    @Body() requestDto: { type: 'homeTeam' | 'awayTeam'; score: number },
+  ) {
+    return this.gameService.updateScore(
+      gameId,
+      requestDto.type,
+      requestDto.score,
+    );
   }
 }

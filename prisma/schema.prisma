@@ -32,6 +32,8 @@ model Player {
   position   Position
 
   captainOf   UserTeam[]  @relation("TeamCaptain")
+
+  nicknames String @default("")
   gameTeams   GameTeam[] @relation("PlayerTeams")
 
   // Many-to-many relation with UserTeam
