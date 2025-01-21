@@ -18,6 +18,8 @@ export class GameEndProcessor extends WorkerHost {
       },
     });
 
+    await this.prisma.player.updateMany({ data: { inGame: false } });
+
     if (!game) {
       throw new Error('Game not found');
     }
