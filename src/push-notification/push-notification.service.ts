@@ -24,15 +24,7 @@ export class PushNotificationService {
     );
   }
 
-  async saveToken(tokenPayload: TokenDTO) {
-    const token = await this.prisma.notificationToken.count({
-      where: {
-        token: tokenPayload.token,
-      },
-    });
-    if (token) {
-      return null;
-    }
+  async saveToken(tokenPayload: TokenDTO & { userId: number }) {
     return await this.prisma.notificationToken.create({ data: tokenPayload });
   }
 
