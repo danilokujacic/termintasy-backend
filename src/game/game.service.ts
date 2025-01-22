@@ -3,6 +3,7 @@ import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '../prisma.service';
 import { GameStatTypeDTO, GameTeamTransferDTO } from '../types';
 import { InjectQueue } from '@nestjs/bullmq';
+import { OpenAI } from 'openai';
 import { Queue } from 'bullmq';
 import { GameStat } from '@prisma/client';
 
@@ -14,6 +15,83 @@ export class GameService {
     @InjectQueue('gameEndQueue') private gameEndQueue: Queue,
     @InjectQueue('gameStartProcessor') private gameStartQueue: Queue,
   ) {}
+
+  async updateScore(gameId: string, type: string, score: number) {
+    console.log(gameId);
+    return this.prisma.game.update({
+      where: {
+        id: gameId,
+      },
+      data: {
+        [type]: score,
+      },
+    });
+  }
+
+  async ai(prompt: string) {
+    const players = await this.prisma.player.findMany();
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_TOKEN,
+    });
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+
+      messages: [
+        {
+          role: 'user',
+          content: `You are a natural language processing assistant. Convert the following free text about players' game performance into a structured JSON object. You will be given a list of players from a database, where each player has an 'id', 'name', and 'nickname'. 
+
+You must adhere to these rules:
+1. Use exact name or nickname matches (case-insensitive) to find players. If a match is not found, **skip that player**.
+2. Do not default to unrelated players when a nickname or name is ambiguous or missing.
+3. Aggregated stats must be calculated correctly if a player is mentioned multiple times.
+4. The nicknames goes nicknames: nickname1,nickname2, etc.
+
+Each player's JSON object must include:
+- 'id': The player's unique identifier from the database.
+- 'name': The player's full name from the database.
+- 'played': Always set to 'true'.
+- 'goals': Total number of goals scored, default is '0'.
+- 'assists': Total number of assists, default is '0'.
+- 'saves': Total number of saves made, default is '0'.
+- 'cleanSheets': Total number of clean sheets ('cs'), default is '0'.
+
+Handle the following input formats:
+1. Goals/assists in shorthand (e.g., '1g' for 1 goal, '2a' for 2 assists).
+2. Repeated mentions of the same player (e.g., 'Stivi 1 1 1 1' means 4 goals for Stefan Ilic).
+3. Multiple players in one input (e.g., 'Stivi 1g 2a, Leko 1g 1a').
+4. Multiple players in one input but not shorthands (e.g 'Stipe go or Stipe 1 go, leko 2 gola, sole 3 gola 2 asistencije)
+
+Here is the list of players:
+${JSON.stringify(players)}
+
+Input: "${prompt}"
+
+Return a structured JSON with the following format:
+
+{
+"players" : [
+          {
+"id": 1,
+"name": "(player name)", ...}
+]
+
+}.`,
+        },
+      ],
+    });
+
+    const result = completion.choices[0].message?.content.trim();
+    return JSON.parse(result);
+  }
+
+  async findActiveGame() {
+    return this.prisma.game.findFirst({
+      where: { active: true },
+      include: { gameStats: true },
+    });
+  }
 
   async transferPlayers(gameId: string, transferDTO: GameTeamTransferDTO) {
     const { homePlayers, awayPlayers } = transferDTO;
@@ -247,8 +325,8 @@ export class GameService {
         data: {
           active: true,
           points: 0,
-          [gameStatDTO.type]:
-            gameStatDTO.type === 'played' ? true : gameStatDTO.value,
+          played: true,
+          ...gameStatDTO,
         },
       });
     } else {
@@ -258,8 +336,8 @@ export class GameService {
           active: true,
           playerId: +playerId,
           points: 0,
-          [gameStatDTO.type]:
-            gameStatDTO.type === 'played' ? true : gameStatDTO.value,
+          played: true,
+          ...gameStatDTO,
         },
       });
     }
