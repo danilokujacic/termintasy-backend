@@ -23,6 +23,7 @@ export class AuthService {
       select: {
         username: true,
         userTeam: true,
+        admin: true,
         email: true,
         id: true,
       },
@@ -54,6 +55,7 @@ export class AuthService {
       });
       token = await this.jwtService.signAsync({
         sub: user.id,
+        admin: user.admin,
         email: user.email,
         username: user.username,
       });

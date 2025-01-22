@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '../prisma.service';
-import { GameStatTypeDTO, GameTeamTransferDTO } from '../types';
+import { CreateGameDTO, GameStatTypeDTO, GameTeamTransferDTO } from '../types';
 import { InjectQueue } from '@nestjs/bullmq';
 import { OpenAI } from 'openai';
 import { Queue } from 'bullmq';
@@ -16,6 +16,31 @@ export class GameService {
     @InjectQueue('gameStartProcessor') private gameStartQueue: Queue,
   ) {}
 
+  async updateGame(gameDto: CreateGameDTO, gameId: string) {
+    return this.prisma.game.update({
+      where: {
+        id: gameId,
+      },
+      data: {
+        matchDate: gameDto.gameDate,
+        homeTeam: {
+          update: {
+            players: {
+              set: gameDto.homeTeam.players.map((player) => ({ id: player })),
+            },
+          },
+        },
+        awayTeam: {
+          update: {
+            players: {
+              set: gameDto.awayTeam.players.map((player) => ({ id: player })),
+            },
+          },
+        },
+      },
+    });
+  }
+
   async updateScore(gameId: string, type: string, score: number) {
     console.log(gameId);
     return this.prisma.game.update({
@@ -26,6 +51,30 @@ export class GameService {
         [type]: score,
       },
     });
+  }
+
+  async upcommingGame() {
+    const game = await this.prisma.game.findFirst({
+      where: {
+        matchDate: {
+          gt: new Date(),
+        },
+      },
+      include: {
+        homeTeam: {
+          include: { players: true },
+        },
+        awayTeam: {
+          include: { players: true },
+        },
+      },
+    });
+
+    if (!game) {
+      return null;
+    }
+
+    return game;
   }
 
   async ai(prompt: string) {

@@ -29,6 +29,19 @@ export class GameController {
       gameDTO.gameDate,
     );
   }
+  @UseGuards(AdminGuard)
+  @Put(':gameId')
+  async updateGame(
+    @Body() gameDto: CreateGameDTO,
+    @Param('gameId') gameId: string,
+  ) {
+    return this.gameService.updateGame(gameDto, gameId);
+  }
+
+  @Get('upcomming-game')
+  async getUpcommingGame() {
+    return await this.gameService.upcommingGame();
+  }
 
   @Get('active-game')
   async findActiveGame() {
@@ -66,7 +79,7 @@ export class GameController {
     return this.getPlayerGameStat(gameId, playerId);
   }
 
-  // @UseGuards(AdminGuard)
+  @UseGuards(AdminGuard)
   @Post(':gameId/game-stat/:playerId')
   async updateGameStat(
     @Param('gameId') gameId: string,
