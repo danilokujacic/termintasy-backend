@@ -25,7 +25,24 @@ export class PushNotificationService {
   }
 
   async saveToken(tokenPayload: TokenDTO & { userId: number }) {
-    return await this.prisma.notificationToken.create({ data: tokenPayload });
+    const tokenExists = await this.prisma.notificationToken.count({
+      where: {
+        user: { id: tokenPayload.userId },
+      },
+    });
+    if (tokenExists) {
+      return null;
+    }
+
+    console.info(
+      `Successfully created device token ${tokenPayload.token} for user ${tokenPayload.userId}`,
+    );
+    return await this.prisma.notificationToken.create({
+      data: {
+        token: tokenPayload.token,
+        user: { connect: { id: tokenPayload.userId } },
+      },
+    });
   }
 
   async sendNotification(
