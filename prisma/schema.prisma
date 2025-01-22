@@ -21,6 +21,7 @@ model User {
   password String?
   openid String?
   admin Boolean @default(false)
+  tokens NotificationToken? @relation("DeviceTokens")
 
   // Relation to UserTeam (not nullable)
   userTeam UserTeam? @relation("UserTeamOwner")
@@ -68,6 +69,8 @@ model GameStat {
 model NotificationToken {
   id         Int      @id @default(autoincrement())  
   token String
+  userId Int @unique
+  user User @relation("DeviceTokens", fields: [userId], references: [id])
 }
 
 model Game {

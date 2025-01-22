@@ -24,16 +24,25 @@ export class PushNotificationService {
     );
   }
 
-  async saveToken(tokenPayload: TokenDTO) {
-    const token = await this.prisma.notificationToken.count({
+  async saveToken(tokenPayload: TokenDTO & { userId: number }) {
+    const tokenExists = await this.prisma.notificationToken.count({
       where: {
-        token: tokenPayload.token,
+        user: { id: tokenPayload.userId },
       },
     });
-    if (token) {
+    if (tokenExists) {
       return null;
     }
-    return await this.prisma.notificationToken.create({ data: tokenPayload });
+
+    console.info(
+      `Successfully created device token ${tokenPayload.token} for user ${tokenPayload.userId}`,
+    );
+    return await this.prisma.notificationToken.create({
+      data: {
+        token: tokenPayload.token,
+        user: { connect: { id: tokenPayload.userId } },
+      },
+    });
   }
 
   async sendNotification(
